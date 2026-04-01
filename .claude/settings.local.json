@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker --version:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker compose:*)",
+      "Bash(where:*)",
+      "Bash(cmd.exe /c \"where docker 2>nul && docker --version\")",
+      "Bash(cmd.exe /c \"dir /s /b C:\\\\Users\\\\mammo\\\\Documents\\\\projects\\\\edgeFinder\")",
+      "Bash(python -c \"import ast; import pathlib; files = list\\(pathlib.Path\\(''C:/Users/mammo/Documents/projects/edgeFinder/backend''\\).rglob\\(''*.py''\\)\\); errors = []; [errors.append\\(f''{f}: {e}''\\) for f in files for e in [None] if not \\(lambda: \\(ast.parse\\(f.read_text\\(\\)\\), True\\)\\)\\(\\)[1]] if False else None; [print\\(f''OK: {f}''\\) for f in files if not any\\(str\\(f\\) in e for e in errors\\)]\")",
+      "Bash(python -c:*)",
+      "Bash(pip install:*)"
+    ]
+  }
+}
