@@ -9,7 +9,20 @@
       "Bash(cmd.exe /c \"dir /s /b C:\\\\Users\\\\mammo\\\\Documents\\\\projects\\\\edgeFinder\")",
       "Bash(python -c \"import ast; import pathlib; files = list\\(pathlib.Path\\(''C:/Users/mammo/Documents/projects/edgeFinder/backend''\\).rglob\\(''*.py''\\)\\); errors = []; [errors.append\\(f''{f}: {e}''\\) for f in files for e in [None] if not \\(lambda: \\(ast.parse\\(f.read_text\\(\\)\\), True\\)\\)\\(\\)[1]] if False else None; [print\\(f''OK: {f}''\\) for f in files if not any\\(str\\(f\\) in e for e in errors\\)]\")",
       "Bash(python -c:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(curl -s -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://trading-api.kalshi.com/trade-api/v2/markets?status=open&limit=3\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -sv -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://trading-api.kalshi.com/trade-api/v2/markets?status=open&limit=3\")",
+      "Bash(curl -s -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://api.elections.kalshi.com/trade-api/v2/markets?status=open&limit=3\")",
+      "Bash(curl -s -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://api.elections.kalshi.com/trade-api/v2/markets?status=open&limit=100&series_ticker=KXNBAWIN\")",
+      "Bash(curl -s -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://api.elections.kalshi.com/trade-api/v2/events?status=open&limit=100\")",
+      "Bash(curl -s -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://api.elections.kalshi.com/trade-api/v2/markets?status=open&limit=200\")",
+      "Bash(curl -s -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://api.elections.kalshi.com/trade-api/v2/events?status=open&limit=200\")",
+      "Bash(curl -s -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://api.elections.kalshi.com/trade-api/v2/markets?status=open&limit=200&series_ticker=KXNBA\")",
+      "Bash(curl -s -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://api.elections.kalshi.com/trade-api/v2/events/KXNBAWIN-26APR01BOSMIA\")",
+      "Bash(curl -s -H \"Authorization: Bearer a4585cf5-8f06-49f0-9fbd-f9d3adff6acd\" \"https://api.elections.kalshi.com/trade-api/v2/markets?series_ticker=KXNBAGAME&status=active&limit=50\")",
+      "Bash(docker exec:*)",
+      "Bash(curl -s http://localhost:8000/games/18447924)"
     ]
   }
 }

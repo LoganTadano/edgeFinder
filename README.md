@@ -1,6 +1,6 @@
 # EdgeFinder
 
-A sports betting edge-detection tool that compares a machine learning model's win probabilities against live Polymarket odds to surface games where the market may be mispriced.
+A sports betting edge-detection tool that compares a machine learning model's win probabilities against live Kalshi odds to surface games where the market may be mispriced.
 
 ---
 
@@ -19,7 +19,7 @@ EdgeFinder ingests live NBA game data and market odds, runs a logistic regressio
 | ORM | SQLAlchemy |
 | ML Model | scikit-learn (logistic regression) |
 | Data — Games | BallDontLie API (free NBA stats) |
-| Data — Odds | Polymarket CLOB API |
+| Data — Odds | Kalshi API |
 | Task Scheduling | APScheduler (polls every 15 minutes) |
 | Containerization | Docker + Docker Compose |
 | Frontend (planned) | React + Vite + Tailwind CSS + Recharts |
@@ -53,7 +53,7 @@ edgeFinder/
     │
     ├── ingestion/
     │   ├── balldontlie.py      # Fetches today's NBA games from BallDontLie API
-    │   ├── polymarket.py       # Fetches live win-market odds from Polymarket
+    │   ├── kalshi.py           # Fetches live win-market odds from Kalshi
     │   └── scheduler.py        # APScheduler — runs ingestion every 15 minutes
     │
     ├── ml/
@@ -87,7 +87,7 @@ edgeFinder/
 | timestamp | datetime | When the snapshot was taken |
 | home_win_prob | float | Market-implied probability (0–1) |
 | away_win_prob | float | Market-implied probability (0–1) |
-| source | string | e.g. `polymarket` |
+| source | string | e.g. `kalshi` |
 
 **predictions**
 | Column | Type | Notes |
@@ -199,7 +199,7 @@ uvicorn main:app --reload
 
 ## Testing an Ingestion File Directly
 
-To iterate on `balldontlie.py` or `polymarket.py` without running the full app, add a `__main__` block and run the file directly:
+To iterate on `balldontlie.py` or `kalshi.py` without running the full app, add a `__main__` block and run the file directly:
 
 ```python
 # at the bottom of balldontlie.py
@@ -241,9 +241,9 @@ python ingestion/balldontlie.py
 
 ## What's Coming Next
 
-### Phase 2 — Polymarket Ingestion
-- Implement `fetch_odds()` in `polymarket.py`
-- Query the Polymarket CLOB API for active NBA win markets
+### Phase 2 — Kalshi Ingestion
+- Implement `fetch_odds()` in `kalshi.py`
+- Query the Kalshi API for active NBA win markets
 - Map market slugs to `game_id` by team name matching
 - Insert `OddsSnapshot` rows on each scheduler tick
 
