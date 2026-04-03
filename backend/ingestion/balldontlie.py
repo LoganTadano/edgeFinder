@@ -44,17 +44,20 @@ async def fetch_games():
         for game in data["data"]:
             existing = db.query(Game).filter(Game.game_id == game["id"]).first()
             if existing:
-                continue
-            new_game = Game(
-                game_id=game["id"],
-                home_team=game["home_team"]["full_name"],
-                away_team=game["visitor_team"]["full_name"],
-                game_date=game["date"],
-                home_score=game["home_team_score"],
-                away_score=game["visitor_team_score"],
-                status=game["status"]
-            )
-            db.add(new_game)
+                existing.home_score = game["home_team_score"]
+                existing.away_score = game["visitor_team_score"]
+                existing.status = game["status"]
+            else:
+                new_game = Game(
+                    game_id=game["id"],
+                    home_team=game["home_team"]["full_name"],
+                    away_team=game["visitor_team"]["full_name"],
+                    game_date=game["date"][:10],
+                    home_score=game["home_team_score"],
+                    away_score=game["visitor_team_score"],
+                    status=game["status"],
+                )
+                db.add(new_game)
         db.commit()
         print(f"Successfully inserted games for {today}") 
     except Exception as e:
