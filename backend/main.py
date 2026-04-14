@@ -10,8 +10,18 @@ from models import game, odds_snapshot, prediction
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print(f">>> Tables in metadata: {list(Base.metadata.tables.keys())}")
     Base.metadata.create_all(bind=engine)
+    # Auto-train model on startup if pkl is missing and training data exists
+    from pathlib import Path
+    if not Path("/app/ml/trained_model.pkl").exists():
+        print("No trained model found — attempting auto-train...")
+        from ml.model import train
+        from database import SessionLocal
+        db = SessionLocal()
+        try:
+            train(db)
+        finally:
+            db.close()
     start_scheduler()
     yield
 

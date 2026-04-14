@@ -1,33 +1,90 @@
-import { Link, Route, Routes } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import Edges from "./pages/Edges";
-import GameDetail from "./pages/GameDetail";
+import { useState } from "react";
+import Header from "./components/Header";
+import EdgeAlertsPanel from "./components/EdgeAlertsPanel";
+import GamesList from "./components/GamesList";
+import GameDetailDrawer from "./components/GameDetailDrawer";
+import { useGames } from "./hooks/useGames";
+import { useEdges } from "./hooks/useEdges";
 
-function App() {
+export default function App() {
+  const [threshold, setThreshold] = useState(0.05);
+  const [selectedGameId, setSelectedGameId] = useState(null);
+
+  const {
+    games,
+    loading: gamesLoading,
+    error: gamesError,
+    lastUpdated,
+    retry: retryGames,
+  } = useGames();
+  const {
+    edges,
+    loading: edgesLoading,
+    error: edgesError,
+    retry: retryEdges,
+  } = useEdges(threshold);
+
+  const hasError = gamesError || edgesError;
+
   return (
-    <div className="min-h-screen">
-      <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center gap-8">
-        <span className="text-xl font-bold text-green-400">EdgeFinder</span>
-        <Link to="/" className="text-gray-300 hover:text-white transition">
-          Dashboard
-        </Link>
-        <Link
-          to="/edges"
-          className="text-gray-300 hover:text-white transition"
-        >
-          Edges
-        </Link>
-      </nav>
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        background: "#080c14",
+      }}
+    >
+      <Header lastUpdated={lastUpdated} />
 
-      <main className="p-6">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/game/:id" element={<GameDetail />} />
-          <Route path="/edges" element={<Edges />} />
-        </Routes>
-      </main>
+      {hasError && (
+        <div
+          className="flex items-center justify-between px-6 py-2 flex-shrink-0"
+          style={{
+            background: "rgba(255,59,78,0.08)",
+            borderBottom: "1px solid rgba(255,59,78,0.2)",
+          }}
+        >
+          <span className="font-dm text-sm" style={{ color: "#ff3b4e" }}>
+            ⚠ API connection failed — retrying...
+          </span>
+          <button
+            onClick={() => {
+              retryGames();
+              retryEdges();
+            }}
+            className="font-barlow font-bold text-xs tracking-widest px-3 py-1 rounded"
+            style={{
+              background: "rgba(255,59,78,0.12)",
+              color: "#ff3b4e",
+              border: "1px solid rgba(255,59,78,0.25)",
+              cursor: "pointer",
+            }}
+          >
+            RETRY
+          </button>
+        </div>
+      )}
+
+      <EdgeAlertsPanel
+        edges={edges}
+        loading={edgesLoading}
+        threshold={threshold}
+        onThresholdChange={setThreshold}
+      />
+
+      <GamesList
+        games={games}
+        edges={edges}
+        loading={gamesLoading}
+        onGameClick={setSelectedGameId}
+      />
+
+      <GameDetailDrawer
+        gameId={selectedGameId}
+        onClose={() => setSelectedGameId(null)}
+      />
     </div>
   );
 }
-
-export default App;

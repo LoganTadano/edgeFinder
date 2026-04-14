@@ -253,28 +253,56 @@ python ingestion/balldontlie.py
 - Joins latest `Prediction` against latest `OddsSnapshot` per game
 - Filters to `abs(model_home_prob - home_win_prob) > threshold` and returns ranked results
 
+### Prediction Pipeline — Complete
+- `ml/predict_today.py` added — builds feature rows for today's games using current-season rolling stats and writes `Prediction` rows to the DB
+- `seed_historical.py` run successfully — 1,220 completed games from the 2025–26 season backfilled
+- Logistic regression trained on 1,220 games, `trained_model.pkl` serialized to disk
+- Scheduler updated to run `run_predictions()` every 15 minutes alongside `fetch_games` and `fetch_odds`
+- Full pipeline verified end-to-end: 15 predictions written for April 12 slate
+- Backend auto-trains model on startup if `trained_model.pkl` is missing
+
+### Phase 5 — Complete
+- Vite + React + Tailwind CSS frontend in `frontend/`
+- "Sharp Sportsbook" aesthetic — dark terminal UI with Barlow Condensed + DM Sans fonts
+- Live edges panel with threshold slider (debounced), edge cards with strong-edge glow
+- Full games table with color-coded edge column and live/final/scheduled status badges
+- Slide-in game detail drawer with probability bar and Recharts odds history chart
+- Mock data fallback when API returns no games (e.g. off-season)
+- Frontend added to `docker-compose.yml` — full stack launches with a single command
+
 ---
 
-## What's Coming Next
+## Project Status
 
-### Step 1 — Wire up the prediction pipeline (critical)
-The scheduler runs `fetch_games` and `fetch_odds` but **nothing writes `Prediction` rows yet**.
-- Add a `run_predictions()` function in `ml/` that builds features for today's games and inserts `Prediction` rows
-- Schedule it in `scheduler.py` alongside the existing jobs
+**All phases complete.** The full pipeline runs end-to-end:
 
-### Step 2 — Seed data and train the model
-- Run `seed_historical.py` to backfill the 2024–25 season into the `games` table
-- Run `ml/model.py` directly to produce `trained_model.pkl`
-- Without this file, `predict()` returns nothing
+```
+BallDontLie API → games table
+Kalshi API      → odds_snapshots table   } every 15 min via APScheduler
+ML model        → predictions table
+                     ↓
+         GET /edges → React dashboard
+```
 
-### Step 3 — End-to-end verification
-With Docker running, verify the full pipeline:
-- `GET /games/today` returns today's games
-- `GET /odds/{game_id}` returns odds snapshots
-- `GET /edges` returns ranked edges once predictions are flowing
+### First-Time Setup
 
-### Phase 5 — React Dashboard
-- Vite + React + Tailwind CSS frontend in a `frontend/` directory
-- Daily games list hitting `GET /games/today`
-- Edges panel hitting `GET /edges`
-- Recharts for probability visualizations and historical accuracy tracking
+After cloning, seed the database and train the model before running Docker:
+
+```bash
+# 1. Start only the database
+docker-compose up db
+
+# 2. In a separate terminal — seed historical games and train
+cd backend
+python -m venv venv && venv\Scripts\activate
+pip install -r requirements.txt
+export DATABASE_URL=postgresql://logan:edgefinder123@localhost:5432/edgefinder
+export BALLDONTLIE_API_KEY=your_key_here
+python ingestion/seed_historical.py
+python ml/model.py
+
+# 3. Now bring up the full stack
+docker-compose up --build
+```
+
+Frontend: **http://localhost:5173** · API: **http://localhost:8000** · Docs: **http://localhost:8000/docs**

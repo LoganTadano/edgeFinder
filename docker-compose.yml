@@ -20,12 +20,21 @@ services:
     ports:
       - "8000:8000"
     volumes:
-    - ./backend:/app 
+      - ./backend:/app
     depends_on:
       db:
         condition: service_healthy
     env_file:
       - .env
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
 
 volumes:
   pgdata:
