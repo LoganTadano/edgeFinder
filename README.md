@@ -237,27 +237,44 @@ python ingestion/balldontlie.py
 - 9 games successfully inserted into Postgres and verified
 - Scheduler polling every 15 minutes
 
+### Phase 2 — Complete
+- `fetch_odds()` implemented in `kalshi.py`
+- Queries Kalshi API for all open NBA win markets via `KXNBAGAME` series ticker
+- Maps market slugs to `game_id` by city-name substring matching against today's DB games
+- Inserts `OddsSnapshot` rows with home/away implied probabilities on each scheduler tick
+
+### Phase 3 — Complete
+- `build_feature_matrix()` implemented in `ml/features.py` — computes rolling win%, rest days per team from historical `games` table
+- Logistic regression training and inference implemented in `ml/model.py` — serializes model to `trained_model.pkl`
+- `seed_historical.py` added to backfill the full 2024–25 NBA season from BallDontLie
+
+### Phase 4 — Complete
+- `GET /edges` implemented in `routers/edges.py`
+- Joins latest `Prediction` against latest `OddsSnapshot` per game
+- Filters to `abs(model_home_prob - home_win_prob) > threshold` and returns ranked results
+
 ---
 
 ## What's Coming Next
 
-### Phase 2 — Kalshi Ingestion
-- Implement `fetch_odds()` in `kalshi.py`
-- Query the Kalshi API for active NBA win markets
-- Map market slugs to `game_id` by team name matching
-- Insert `OddsSnapshot` rows on each scheduler tick
+### Step 1 — Wire up the prediction pipeline (critical)
+The scheduler runs `fetch_games` and `fetch_odds` but **nothing writes `Prediction` rows yet**.
+- Add a `run_predictions()` function in `ml/` that builds features for today's games and inserts `Prediction` rows
+- Schedule it in `scheduler.py` alongside the existing jobs
 
-### Phase 3 — ML Model
-- Feature engineering from historical game data (home/away record, rest days, point differential)
-- Train a logistic regression model in `ml/model.py`
-- Run inference on today's games and write `Prediction` rows
+### Step 2 — Seed data and train the model
+- Run `seed_historical.py` to backfill the 2024–25 season into the `games` table
+- Run `ml/model.py` directly to produce `trained_model.pkl`
+- Without this file, `predict()` returns nothing
 
-### Phase 4 — Edge API
-- Implement `GET /edges` to join predictions against latest odds snapshots
-- Filter to games where `abs(model_home_prob - home_win_prob) > threshold`
-- Return ranked list with team names, probabilities, and signed edge value
+### Step 3 — End-to-end verification
+With Docker running, verify the full pipeline:
+- `GET /games/today` returns today's games
+- `GET /odds/{game_id}` returns odds snapshots
+- `GET /edges` returns ranked edges once predictions are flowing
 
 ### Phase 5 — React Dashboard
-- Vite + React + Tailwind CSS frontend
-- Daily games list with live odds and model probabilities side-by-side
-- Edge highlights and historical accuracy tracking
+- Vite + React + Tailwind CSS frontend in a `frontend/` directory
+- Daily games list hitting `GET /games/today`
+- Edges panel hitting `GET /edges`
+- Recharts for probability visualizations and historical accuracy tracking
