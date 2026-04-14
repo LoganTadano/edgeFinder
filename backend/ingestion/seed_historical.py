@@ -37,18 +37,21 @@ def fetch_historical_games():
             if cursor:
                 params["cursor"] = cursor
 
-            for attempt in range(3):
+            for attempt in range(5):
                 response = requests.get(
                     f"{BASE_URL}/games",
                     headers={"Authorization": f"Bearer {API_KEY}"},
                     params=params,
                 )
                 if response.status_code == 429:
-                    wait = 10 * (attempt + 1)
+                    wait = 15 * (attempt + 1)
                     print(f"Rate limited, waiting {wait}s...")
                     time.sleep(wait)
                     continue
                 response.raise_for_status()
+                break
+            else:
+                print("Max retries hit, stopping.")
                 break
             data = response.json()
             games = data.get("data", [])
