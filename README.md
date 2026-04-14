@@ -1,6 +1,8 @@
 # EdgeFinder
 
-A sports betting edge-detection tool that compares a machine learning model's win probabilities against live Kalshi odds to surface games where the market may be mispriced.
+A full-stack sports betting edge-detection tool. It ingests live NBA game data and Kalshi market odds, runs a machine learning model to generate independent win probability estimates, and surfaces games where the model disagrees with the market — potential mispricings worth betting on.
+
+The data pipeline, REST API, and React dashboard are production-ready. The ML model is a work in progress — currently a logistic regression baseline, actively being improved toward better probability calibration and real predictive edge. See [Model Performance & Roadmap](#model-performance--roadmap) below.
 
 ---
 
@@ -17,7 +19,7 @@ EdgeFinder ingests live NBA game data and market odds, runs a logistic regressio
 | Backend API | FastAPI (Python 3.11) |
 | Database | PostgreSQL 15 |
 | ORM | SQLAlchemy |
-| ML Model | scikit-learn (logistic regression) |
+| ML Model | scikit-learn (logistic regression, in progress) |
 | Data — Games | BallDontLie API (free NBA stats) |
 | Data — Odds | Kalshi API |
 | Task Scheduling | APScheduler (polls every 15 minutes) |
@@ -269,6 +271,35 @@ python ingestion/balldontlie.py
 - Slide-in game detail drawer with probability bar and Recharts odds history chart
 - Mock data fallback when API returns no games (e.g. off-season)
 - Frontend added to `docker-compose.yml` — full stack launches with a single command
+
+---
+
+## Model Performance & Roadmap
+
+> **Work in progress.** The model is a functional baseline — the goal is iterative improvement toward well-calibrated probabilities that genuinely disagree with the market on the right games.
+
+### Current Model
+
+- **Algorithm:** Logistic regression (scikit-learn)
+- **Training data:** 1,220 completed NBA games from the 2025–26 regular season
+- **Features:**
+  - `home_win_pct` — rolling home team win percentage up to game date
+  - `away_win_pct` — rolling away team win percentage up to game date
+  - `home_rest_days` — days since home team last played
+  - `away_rest_days` — days since away team last played
+- **Learned coefficients:** `[+2.57, -2.56, +0.07, -0.04]`
+  - Win percentage dominates, as expected. Rest days have small but logical directional effects.
+
+Logistic regression was chosen intentionally for this baseline — it outputs well-calibrated probabilities out of the box, which matters more than raw accuracy for edge detection (a model that says 70% should win ~70% of the time).
+
+### What's Next
+
+- [ ] **Train/test split + evaluation metrics** — AUC-ROC and Brier score to quantify calibration
+- [ ] **Additional features** — rolling point differential, strength of schedule, home/away splits, back-to-back flags
+- [ ] **XGBoost** — once enough data justifies the added complexity and risk of overfitting
+- [ ] **Opponent-adjusted stats** — account for who the team beat/lost to, not just win/loss record
+- [ ] **Multi-season training data** — pull prior seasons via BallDontLie to increase training set size
+- [ ] **Backtesting framework** — replay historical odds snapshots against model predictions to measure theoretical P&L
 
 ---
 
